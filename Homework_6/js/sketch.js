@@ -10,12 +10,12 @@ let foods = [];
 
 function preload() {
   // Load ninja idle images
-  ninjaIdle.push(loadImage("images/ninja_idle1.png"));
-  ninjaIdle.push(loadImage("images/ninja_idle2.png"));
+  ninjaIdle.push(loadImage("images/ninja_idle_0.png"));
+  ninjaIdle.push(loadImage("images/ninja_idle_1.png"));
 
   // Load ninja walking images
-  ninjaWalk.push(loadImage("images/ninja_walk1.png"));
-  ninjaWalk.push(loadImage("images/ninja_walk2.png"));
+  ninjaWalk.push(loadImage("images/ninja_run_0.png"));
+  ninjaWalk.push(loadImage("images/ninja_run_1.png"));
 
   // Load pizza image (optional for reference)
   pizzaImg = loadImage("images/pizza.png");
