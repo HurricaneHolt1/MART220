@@ -20,8 +20,8 @@ function preload() {
   pizzaImg = loadImage("images/pizza.png");
   rottenPizzaImg = loadImage("images/rotten_pizza.png"); // your rotten pizza
 
-  goodSound = loadSound("sounds/good.wav");
-  badSound = loadSound("sounds/bad.wav");
+  goodSound = loadSound("sounds/good.mp3");
+  badSound = loadSound("sounds/bad.mp3");
   music = loadSound("sounds/music.mp3");
 }
 
