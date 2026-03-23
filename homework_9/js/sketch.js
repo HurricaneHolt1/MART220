@@ -10,6 +10,9 @@ let gameState = "play";
 let idleAnim, walkAnim;
 let pizzaImg, badPizzaImg, rockImg;
 
+// debug/version tag to ensure browser loads the updated file
+console.log('sketch.js loaded — v2');
+
 function preload() {
   // Load animations
   idleAnim = loadAnimation("images/ninja_idle.png");
@@ -33,7 +36,7 @@ function setup() {
   for (let i = 0; i < 3; i++) {
     let o = createSprite(random(width), random(height), 60, 60);
     o.addImage(rockImg);
-    o.immovable = true; // prevent moving on collision
+    o.static = true; // prevent moving on collision (p5.play uses `static` now)
     obstacles.push(o);
   }
 
@@ -109,19 +112,19 @@ function handleMovement() {
   player.velocity.x = 0;
   player.velocity.y = 0;
 
-  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) { // 'A'
+  if (kb.pressing('ArrowLeft') || kb.pressing('a')) {
     player.velocity.x = -4;
     moving = true;
   }
-  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) { // 'D'
+  if (kb.pressing('ArrowRight') || kb.pressing('d')) {
     player.velocity.x = 4;
     moving = true;
   }
-  if (keyIsDown(UP_ARROW) || keyIsDown(87)) { // 'W'
+  if (kb.pressing('ArrowUp') || kb.pressing('w')) {
     player.velocity.y = -4;
     moving = true;
   }
-  if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) { // 'S'
+  if (kb.pressing('ArrowDown') || kb.pressing('s')) {
     player.velocity.y = 4;
     moving = true;
   }
