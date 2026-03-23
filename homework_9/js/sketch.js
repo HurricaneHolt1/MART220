@@ -2,6 +2,8 @@ let player;
 let pizzas;
 let badPizzas;
 let obstacles;
+let idleImg, walk1, walk2;
+let pizzaImg, badPizzaImg, rockImg;
 
 let score = 0;
 let health = 5;
