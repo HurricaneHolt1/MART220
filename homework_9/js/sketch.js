@@ -10,7 +10,10 @@ let gameState = "play";
 let idleAnim, walkAnim;
 
 function preload() {
-  idleAnim = loadAnimation("images/ninja_idle.png");
+  player = new Sprite(400, 300, 50, 50);
+
+// assign images directly instead of animations first
+player.img = "images/ninja_idle.png";
   walkAnim = loadAnimation("images/ninja_walk1.png", "images/ninja_walk2.png");
 
   pizzaImg = loadImage("images/pizza.png");
