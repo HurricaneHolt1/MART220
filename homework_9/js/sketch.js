@@ -29,11 +29,14 @@ function preload() {
 
 function setup() {
   createCanvas(800, 600);
+  // prevent p5.play from auto-drawing sprites (we draw groups manually)
+  this.p5play.autoDrawSprites = false;
 
   // Player setup
   player = createSprite(400, 300, 50, 50);
   player.addAnimation("idle", idleAnim);
   player.addAnimation("walk", walkAnim);
+  player.scale = 0.5;
   playersGroup = new Group();
   playersGroup.add(player);
 
@@ -42,6 +45,7 @@ function setup() {
     let o = createSprite(random(width), random(height), 60, 60);
     o.addImage(rockImg);
     o.static = true; // prevent moving on collision (p5.play uses `static` now)
+    o.scale = 0.5;
     obstacles.push(o);
     if (!obstaclesGroup) obstaclesGroup = new Group();
     obstaclesGroup.add(o);
@@ -51,6 +55,7 @@ function setup() {
   for (let i = 0; i < 5; i++) {
     let p = createSprite(random(width), random(height), 30, 30);
     p.addImage(pizzaImg);
+    p.scale = 0.2;
     pizzas.push(p);
     if (!pizzasGroup) pizzasGroup = new Group();
     pizzasGroup.add(p);
@@ -60,6 +65,7 @@ function setup() {
   for (let i = 0; i < 3; i++) {
     let b = createSprite(random(width), random(height), 30, 30);
     b.addImage(badPizzaImg);
+    b.scale = 0.2;
     badPizzas.push(b);
     if (!badPizzasGroup) badPizzasGroup = new Group();
     badPizzasGroup.add(b);
