@@ -1,5 +1,3 @@
-// Ninja Pizza Game - Updated for latest p5.play
-
 let player;
 let pizzas = [];
 let badPizzas = [];
@@ -9,39 +7,53 @@ let score = 0;
 let health = 5;
 let gameState = "play";
 
+let idleAnim, walkAnim;
+let pizzaImg, badPizzaImg, rockImg;
+
+function preload() {
+  // Load animations
+  idleAnim = loadAnimation("images/ninja_idle.png");
+  walkAnim = loadAnimation("images/ninja_walk1.png", "images/ninja_walk2.png");
+
+  // Load images
+  pizzaImg = loadImage("images/pizza.png");
+  badPizzaImg = loadImage("images/bad_pizza.png");
+  rockImg = loadImage("images/rock.png");
+}
+
 function setup() {
   createCanvas(800, 600);
 
   // Player setup
   player = createSprite(400, 300, 50, 50);
-  player.shapeColor = "red"; // placeholder for ninja
-  player.scale = 1;
+  player.addAnimation("idle", idleAnim);
+  player.addAnimation("walk", walkAnim);
 
   // Obstacles
   for (let i = 0; i < 3; i++) {
     let o = createSprite(random(width), random(height), 60, 60);
-    o.shapeColor = "grey"; // placeholder for rocks
-    o.static = true; // replaces immovable
+    o.addImage(rockImg);
+    o.immovable = true; // prevent moving on collision
     obstacles.push(o);
   }
 
   // Good pizzas
   for (let i = 0; i < 5; i++) {
     let p = createSprite(random(width), random(height), 30, 30);
-    p.shapeColor = "yellow"; // placeholder for pizza
+    p.addImage(pizzaImg);
     pizzas.push(p);
   }
 
   // Bad pizzas
   for (let i = 0; i < 3; i++) {
     let b = createSprite(random(width), random(height), 30, 30);
-    b.shapeColor = "green"; // placeholder for bad pizza
+    b.addImage(badPizzaImg);
     badPizzas.push(b);
   }
 }
 
 function draw() {
-  background(200);
+  background(220);
 
   if (gameState === "play") {
     handleMovement();
@@ -82,12 +94,10 @@ function draw() {
   } else if (gameState === "win") {
     textSize(40);
     textAlign(CENTER, CENTER);
-    fill("blue");
     text("YOU WIN!", width / 2, height / 2);
   } else if (gameState === "lose") {
     textSize(40);
     textAlign(CENTER, CENTER);
-    fill("red");
     text("GAME OVER", width / 2, height / 2);
   }
 
@@ -99,28 +109,26 @@ function handleMovement() {
   player.velocity.x = 0;
   player.velocity.y = 0;
 
-  // Use kb.pressing() instead of keyIsDown
-  if (kb.pressing('ArrowLeft') || kb.pressing('a')) {
+  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) { // 'A'
     player.velocity.x = -4;
     moving = true;
   }
-  if (kb.pressing('ArrowRight') || kb.pressing('d')) {
+  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) { // 'D'
     player.velocity.x = 4;
     moving = true;
   }
-  if (kb.pressing('ArrowUp') || kb.pressing('w')) {
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) { // 'W'
     player.velocity.y = -4;
     moving = true;
   }
-  if (kb.pressing('ArrowDown') || kb.pressing('s')) {
+  if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) { // 'S'
     player.velocity.y = 4;
     moving = true;
   }
 
-  // Placeholder for animation switching
   if (moving) {
-    player.shapeColor = "orange"; // walking state
+    player.changeAnimation("walk");
   } else {
-    player.shapeColor = "red"; // idle state
+    player.changeAnimation("idle");
   }
 }
