@@ -78,6 +78,16 @@ function draw() {
   if (gameState === "play") {
     handleMovement();
 
+    // Debug overlay: show key states and player velocity
+    fill(0);
+    textSize(14);
+    let leftState = kb ? kb.pressing('ArrowLeft') : 0;
+    let rightState = kb ? kb.pressing('ArrowRight') : 0;
+    let upState = kb ? kb.pressing('ArrowUp') : 0;
+    let downState = kb ? kb.pressing('ArrowDown') : 0;
+    text(`Left:${leftState} Right:${rightState} Up:${upState} Down:${downState}`, 20, 90);
+    text(`Vel x:${player.velocity.x.toFixed(2)} y:${player.velocity.y.toFixed(2)}`, 20, 110);
+
     // Collisions with obstacles
     if (obstaclesGroup) player.collide(obstaclesGroup);
 
