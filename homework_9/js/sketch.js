@@ -13,6 +13,9 @@ let pizzaImg, badPizzaImg, rockImg;
 // debug/version tag to ensure browser loads the updated file
 console.log('sketch.js loaded — v2');
 
+// Groups (p5.play)
+let pizzasGroup, badPizzasGroup, obstaclesGroup, playersGroup;
+
 function preload() {
   // Load animations
   idleAnim = loadAnimation("images/ninja_idle.png");
@@ -31,6 +34,8 @@ function setup() {
   player = createSprite(400, 300, 50, 50);
   player.addAnimation("idle", idleAnim);
   player.addAnimation("walk", walkAnim);
+  playersGroup = new Group();
+  playersGroup.add(player);
 
   // Obstacles
   for (let i = 0; i < 3; i++) {
@@ -38,6 +43,8 @@ function setup() {
     o.addImage(rockImg);
     o.static = true; // prevent moving on collision (p5.play uses `static` now)
     obstacles.push(o);
+    if (!obstaclesGroup) obstaclesGroup = new Group();
+    obstaclesGroup.add(o);
   }
 
   // Good pizzas
@@ -45,6 +52,8 @@ function setup() {
     let p = createSprite(random(width), random(height), 30, 30);
     p.addImage(pizzaImg);
     pizzas.push(p);
+    if (!pizzasGroup) pizzasGroup = new Group();
+    pizzasGroup.add(p);
   }
 
   // Bad pizzas
@@ -52,6 +61,8 @@ function setup() {
     let b = createSprite(random(width), random(height), 30, 30);
     b.addImage(badPizzaImg);
     badPizzas.push(b);
+    if (!badPizzasGroup) badPizzasGroup = new Group();
+    badPizzasGroup.add(b);
   }
 }
 
@@ -62,26 +73,24 @@ function draw() {
     handleMovement();
 
     // Collisions with obstacles
-    for (let o of obstacles) {
-      player.collide(o);
-    }
+    if (obstaclesGroup) player.collide(obstaclesGroup);
 
-    // Collect pizzas
-    for (let p of pizzas) {
-      if (player.overlap(p)) {
+    // Collect pizzas (group-based)
+    if (pizzasGroup) {
+      player.overlap(pizzasGroup, function(pl, p) {
         score++;
         p.position.x = random(width);
         p.position.y = random(height);
-      }
+      });
     }
 
-    // Hit bad pizzas
-    for (let b of badPizzas) {
-      if (player.overlap(b)) {
+    // Hit bad pizzas (group-based)
+    if (badPizzasGroup) {
+      player.overlap(badPizzasGroup, function(pl, b) {
         health--;
         b.position.x = random(width);
         b.position.y = random(height);
-      }
+      });
     }
 
     // UI
@@ -104,7 +113,11 @@ function draw() {
     text("GAME OVER", width / 2, height / 2);
   }
 
-  drawSprites();
+  // draw groups (drawSprites is deprecated)
+  if (obstaclesGroup) obstaclesGroup.draw();
+  if (pizzasGroup) pizzasGroup.draw();
+  if (badPizzasGroup) badPizzasGroup.draw();
+  if (playersGroup) playersGroup.draw();
 }
 
 function handleMovement() {
