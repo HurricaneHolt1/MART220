@@ -16,6 +16,23 @@ console.log('sketch.js loaded — v2');
 // Groups (p5.play)
 let pizzasGroup, badPizzasGroup, obstaclesGroup, playersGroup;
 
+// manual key state tracking (fallback if kb isn't available)
+let inputStates = { left: false, right: false, up: false, down: false };
+
+function keyPressed() {
+  if (key === 'a' || key === 'A' || keyCode === LEFT_ARROW) inputStates.left = true;
+  if (key === 'd' || key === 'D' || keyCode === RIGHT_ARROW) inputStates.right = true;
+  if (key === 'w' || key === 'W' || keyCode === UP_ARROW) inputStates.up = true;
+  if (key === 's' || key === 'S' || keyCode === DOWN_ARROW) inputStates.down = true;
+}
+
+function keyReleased() {
+  if (key === 'a' || key === 'A' || keyCode === LEFT_ARROW) inputStates.left = false;
+  if (key === 'd' || key === 'D' || keyCode === RIGHT_ARROW) inputStates.right = false;
+  if (key === 'w' || key === 'W' || keyCode === UP_ARROW) inputStates.up = false;
+  if (key === 's' || key === 'S' || keyCode === DOWN_ARROW) inputStates.down = false;
+}
+
 function preload() {
   // Load animations
   idleAnim = loadAnimation("images/ninja_idle.png");
@@ -81,10 +98,10 @@ function draw() {
     // Debug overlay: show key states and player velocity
     fill(0);
     textSize(14);
-    let leftState = kb ? kb.pressing('ArrowLeft') : 0;
-    let rightState = kb ? kb.pressing('ArrowRight') : 0;
-    let upState = kb ? kb.pressing('ArrowUp') : 0;
-    let downState = kb ? kb.pressing('ArrowDown') : 0;
+    let leftState = (kb && kb.pressing) ? kb.pressing('ArrowLeft') : inputStates.left;
+    let rightState = (kb && kb.pressing) ? kb.pressing('ArrowRight') : inputStates.right;
+    let upState = (kb && kb.pressing) ? kb.pressing('ArrowUp') : inputStates.up;
+    let downState = (kb && kb.pressing) ? kb.pressing('ArrowDown') : inputStates.down;
     text(`Left:${leftState} Right:${rightState} Up:${upState} Down:${downState}`, 20, 90);
     text(`Vel x:${player.velocity.x.toFixed(2)} y:${player.velocity.y.toFixed(2)}`, 20, 110);
 
@@ -157,6 +174,11 @@ function handleMovement() {
     player.velocity.y = 4;
     moving = true;
   }
+  // fallback to manual input tracking
+  if (inputStates.left) { player.velocity.x = -4; moving = true; }
+  if (inputStates.right) { player.velocity.x = 4; moving = true; }
+  if (inputStates.up) { player.velocity.y = -4; moving = true; }
+  if (inputStates.down) { player.velocity.y = 4; moving = true; }
 
   if (moving) {
     player.changeAnimation("walk");
