@@ -7,17 +7,27 @@ let score = 0;
 let health = 5;
 let gameState = "play";
 
+let ninjaImg;
+let pizzaImg;
+let badPizzaImg;
+let rockImg;
+
+function preload() {
+  ninjaImg = loadImage("images/ninja_idle.png");
+  pizzaImg = loadImage("images/pizza.png");
+  badPizzaImg = loadImage("images/bad_pizza.png");
+  rockImg = loadImage("images/rock.png");
+}
+
 function setup() {
   new Canvas(800, 600);
 
-  textSize(24);
-  textAlign(LEFT);
-
   // PLAYER
   player = new Sprite(400, 300, 50, 50);
-  player.color = "red";
+  player.img = ninjaImg;
+  player.scale = 0.4;
 
-  // OBSTACLES
+  // ROCKS
   for (let i = 0; i < 3; i++) {
     let rock = new Sprite(
       random(100, 700),
@@ -26,7 +36,8 @@ function setup() {
       60,
       "static"
     );
-    rock.color = "gray";
+    rock.img = rockImg;
+    rock.scale = 0.3;
     obstacles.push(rock);
   }
 
@@ -38,7 +49,8 @@ function setup() {
       30,
       30
     );
-    pizza.color = "yellow";
+    pizza.img = pizzaImg;
+    pizza.scale = 0.2;
     pizzas.push(pizza);
   }
 
@@ -50,7 +62,8 @@ function setup() {
       30,
       30
     );
-    bad.color = "green";
+    bad.img = badPizzaImg;
+    bad.scale = 0.2;
     badPizzas.push(bad);
   }
 }
@@ -61,7 +74,7 @@ function draw() {
   if (gameState === "play") {
     handleMovement();
 
-    // GOOD PIZZA COLLECTION
+    // COLLECT GOOD PIZZA
     for (let pizza of pizzas) {
       if (player.overlaps(pizza)) {
         score++;
@@ -70,7 +83,7 @@ function draw() {
       }
     }
 
-    // BAD PIZZA HIT
+    // HIT BAD PIZZA
     for (let bad of badPizzas) {
       if (player.overlaps(bad)) {
         health--;
@@ -79,17 +92,11 @@ function draw() {
       }
     }
 
-    // WIN / LOSE
-    if (score >= 10) {
-      gameState = "win";
-    }
-
-    if (health <= 0) {
-      gameState = "lose";
-    }
+    if (score >= 10) gameState = "win";
+    if (health <= 0) gameState = "lose";
   }
 
-  // DRAW UI LAST SO IT SHOWS ON TOP
+  // UI
   fill(0);
   textSize(24);
   text("Score: " + score, 20, 30);
@@ -109,26 +116,21 @@ function draw() {
 }
 
 function handleMovement() {
-  // IMPORTANT RESET
   player.vel.x = 0;
   player.vel.y = 0;
 
-  // LEFT
   if (kb.pressing("left") || kb.pressing("a")) {
     player.vel.x = -4;
   }
 
-  // RIGHT
   if (kb.pressing("right") || kb.pressing("d")) {
     player.vel.x = 4;
   }
 
-  // UP
   if (kb.pressing("up") || kb.pressing("w")) {
     player.vel.y = -4;
   }
 
-  // DOWN
   if (kb.pressing("down") || kb.pressing("s")) {
     player.vel.y = 4;
   }
