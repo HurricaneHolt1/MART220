@@ -77,7 +77,7 @@ function setup() {
     bad.height = 30;
   }
 
-  // Register collisions/overlaps ONCE using groups
+  // Register collisions/overlaps ONCE
   player.collides(rockGroup);
 
   player.overlaps(pizzaGroup, (player, pizza) => {
@@ -102,7 +102,6 @@ function draw() {
     if (score >= 10) gameState = "win";
     if (health <= 0)  gameState = "lose";
   } else {
-    // stop player on win/lose
     player.vel.x = 0;
     player.vel.y = 0;
   }
@@ -141,10 +140,11 @@ function handleMovement() {
   let vy = 0;
   let moving = false;
 
-  if (kb.pressing("left")  || kb.pressing("a")) { vx = -4; moving = true; }
-  if (kb.pressing("right") || kb.pressing("d")) { vx =  4; moving = true; }
-  if (kb.pressing("up")    || kb.pressing("w")) { vy = -4; moving = true; }
-  if (kb.pressing("down")  || kb.pressing("s")) { vy =  4; moving = true; }
+  // Arrow keys use full name, letter keys are lowercase single chars
+  if (kb.pressing("ArrowLeft")  || kb.pressing("a")) { vx = -4; moving = true; }
+  if (kb.pressing("ArrowRight") || kb.pressing("d")) { vx =  4; moving = true; }
+  if (kb.pressing("ArrowUp")    || kb.pressing("w")) { vy = -4; moving = true; }
+  if (kb.pressing("ArrowDown")  || kb.pressing("s")) { vy =  4; moving = true; }
 
   player.vel.x = vx;
   player.vel.y = vy;
