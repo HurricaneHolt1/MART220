@@ -49,7 +49,7 @@ function setup() {
     rock.height = 55;
   }
 
-  // GOOD PIZZA GROUP
+  // GOOD PIZZA GROUP (static collectibles)
   pizzaGroup = new Group();
   for (let i = 0; i < 5; i++) {
     let pizza = new pizzaGroup.Sprite(
@@ -63,7 +63,7 @@ function setup() {
     pizza.height = 30;
   }
 
-  // BAD PIZZA GROUP
+  // BAD PIZZA GROUP (kinematic — they move!)
   badPizzaGroup = new Group();
   for (let i = 0; i < 3; i++) {
     let bad = new badPizzaGroup.Sprite(
@@ -72,9 +72,13 @@ function setup() {
     );
     bad.img = badPizzaImg;
     bad.scale = 0.2;
-    bad.collider = "static";
+    bad.collider = "kinematic";
     bad.width = 30;
     bad.height = 30;
+    bad.rotationLock = true;
+    // give each bad pizza a random patrol velocity
+    bad.vel.x = random(-2, 2);
+    bad.vel.y = random(-2, 2);
   }
 
   // Register collisions/overlaps ONCE
@@ -98,6 +102,7 @@ function draw() {
 
   if (gameState === "play") {
     handleMovement();
+    bounceBadPizzas();
 
     if (score >= 10) gameState = "win";
     if (health <= 0)  gameState = "lose";
@@ -140,11 +145,11 @@ function handleMovement() {
   let vy = 0;
   let moving = false;
 
-  // Arrow keys use full name, letter keys are lowercase single chars
-  if (kb.pressing("ArrowLeft")  || kb.pressing("a")) { vx = -4; moving = true; }
-  if (kb.pressing("ArrowRight") || kb.pressing("d")) { vx =  4; moving = true; }
-  if (kb.pressing("ArrowUp")    || kb.pressing("w")) { vy = -4; moving = true; }
-  if (kb.pressing("ArrowDown")  || kb.pressing("s")) { vy =  4; moving = true; }
+  // "up" "down" "left" "right" work for both arrow keys AND wasd
+  if (kb.pressing("left"))  { vx = -4; moving = true; }
+  if (kb.pressing("right")) { vx =  4; moving = true; }
+  if (kb.pressing("up"))    { vy = -4; moving = true; }
+  if (kb.pressing("down"))  { vy =  4; moving = true; }
 
   player.vel.x = vx;
   player.vel.y = vy;
@@ -154,5 +159,13 @@ function handleMovement() {
     player.img = (frameCount % 20 < 10) ? ninjaWalk1 : ninjaWalk2;
   } else {
     player.img = ninjaIdle;
+  }
+}
+
+// bounce bad pizzas off canvas edges
+function bounceBadPizzas() {
+  for (let bad of badPizzaGroup) {
+    if (bad.x < 20  || bad.x > width  - 20) bad.vel.x *= -1;
+    if (bad.y < 20  || bad.y > height - 20) bad.vel.y *= -1;
   }
 }
