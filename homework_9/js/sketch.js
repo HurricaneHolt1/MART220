@@ -16,15 +16,13 @@ let badPizzaImg;
 let rockImg;
 
 function preload() {
-  // ninja animation frames
-  ninjaIdle = loadImage("images/ninja_idle.png");
-  ninjaWalk1 = loadImage("images/ninja_walk1.png");
-  ninjaWalk2 = loadImage("images/ninja_walk2.png");
+  ninjaIdle = loadImage("../images/ninja_idle.png");
+  ninjaWalk1 = loadImage("../images/ninja_walk1.png");
+  ninjaWalk2 = loadImage("../images/ninja_walk2.png");
 
-  // game items
-  pizzaImg = loadImage("images/pizza.png");
-  badPizzaImg = loadImage("images/bad_pizza.png");
-  rockImg = loadImage("images/rock.png");
+  pizzaImg = loadImage("../images/pizza.png");
+  badPizzaImg = loadImage("../images/bad_pizza.png");
+  rockImg = loadImage("../images/rock.png");
 }
 
 function setup() {
