@@ -16,15 +16,12 @@ let badPizzaImg;
 let rockImg;
 
 function preload() {
-  // ninja animation frames
-  ninjaIdle = loadImage("images/ninja_idle.png");
-  ninjaWalk1 = loadImage("images/ninja_walk1.png");
-  ninjaWalk2 = loadImage("images/ninja_walk2.png");
-
-  // game items
-  pizzaImg = loadImage("images/pizza.png");
+  ninjaIdle   = loadImage("images/ninja_idle.png");
+  ninjaWalk1  = loadImage("images/ninja_walk1.png");
+  ninjaWalk2  = loadImage("images/ninja_walk2.png");
+  pizzaImg    = loadImage("images/pizza.png");
   badPizzaImg = loadImage("images/bad_pizza.png");
-  rockImg = loadImage("images/rock.png");
+  rockImg     = loadImage("images/rock.png");
 }
 
 function setup() {
@@ -34,6 +31,7 @@ function setup() {
   player = new Sprite(400, 300, 50, 50);
   player.img = ninjaIdle;
   player.scale = 0.4;
+  player.rotationLock = true;
 
   // ROCK OBSTACLES
   for (let i = 0; i < 3; i++) {
@@ -105,27 +103,22 @@ function draw() {
       }
     }
 
-    // win / lose
-    if (score >= 10) {
-      gameState = "win";
-    }
-
-    if (health <= 0) {
-      gameState = "lose";
-    }
+    if (score >= 10) gameState = "win";
+    if (health <= 0)  gameState = "lose";
   }
 
   // UI
   fill(0);
   textSize(24);
   textAlign(LEFT);
-  text("Score: " + score, 20, 30);
+  text("Score: "  + score,  20, 30);
   text("Health: " + health, 20, 60);
 
   // WIN SCREEN
   if (gameState === "win") {
     textSize(50);
     textAlign(CENTER);
+    fill(0);
     text("YOU WIN!", width / 2, height / 2);
   }
 
@@ -133,39 +126,23 @@ function draw() {
   if (gameState === "lose") {
     textSize(50);
     textAlign(CENTER);
+    fill(0);
     text("GAME OVER", width / 2, height / 2);
   }
 }
 
 function handleMovement() {
-  player.vel.x = 0;
-  player.vel.y = 0;
-
+  let vx = 0;
+  let vy = 0;
   let moving = false;
 
-  // LEFT
-  if (kb.pressing("left") || kb.pressing("a")) {
-    player.vel.x = -4;
-    moving = true;
-  }
+  if (kb.pressing("left")  || kb.pressing("a")) { vx = -4; moving = true; }
+  if (kb.pressing("right") || kb.pressing("d")) { vx =  4; moving = true; }
+  if (kb.pressing("up")    || kb.pressing("w")) { vy = -4; moving = true; }
+  if (kb.pressing("down")  || kb.pressing("s")) { vy =  4; moving = true; }
 
-  // RIGHT
-  if (kb.pressing("right") || kb.pressing("d")) {
-    player.vel.x = 4;
-    moving = true;
-  }
-
-  // UP
-  if (kb.pressing("up") || kb.pressing("w")) {
-    player.vel.y = -4;
-    moving = true;
-  }
-
-  // DOWN
-  if (kb.pressing("down") || kb.pressing("s")) {
-    player.vel.y = 4;
-    moving = true;
-  }
+  player.velocity.x = vx;
+  player.velocity.y = vy;
 
   // WALK ANIMATION
   if (moving) {
