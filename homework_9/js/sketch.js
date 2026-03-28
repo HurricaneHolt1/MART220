@@ -16,13 +16,41 @@ let badPizzaImg;
 let rockImg;
 
 function preload() {
-  ninjaIdle = loadImage("../images/ninja_idle.png");
-  ninjaWalk1 = loadImage("../images/ninja_walk1.png");
-  ninjaWalk2 = loadImage("../images/ninja_walk2.png");
+  ninjaIdle = loadImage(
+    "images/ninja_idle.png",
+    () => console.log("idle loaded"),
+    () => console.log("idle FAILED")
+  );
 
-  pizzaImg = loadImage("../images/pizza.png");
-  badPizzaImg = loadImage("../images/bad_pizza.png");
-  rockImg = loadImage("../images/rock.png");
+  ninjaWalk1 = loadImage(
+    "images/ninja_walk1.png",
+    () => console.log("walk1 loaded"),
+    () => console.log("walk1 FAILED")
+  );
+
+  ninjaWalk2 = loadImage(
+    "images/ninja_walk2.png",
+    () => console.log("walk2 loaded"),
+    () => console.log("walk2 FAILED")
+  );
+
+  pizzaImg = loadImage(
+    "images/pizza.png",
+    () => console.log("pizza loaded"),
+    () => console.log("pizza FAILED")
+  );
+
+  badPizzaImg = loadImage(
+    "images/bad_pizza.png",
+    () => console.log("bad pizza loaded"),
+    () => console.log("bad pizza FAILED")
+  );
+
+  rockImg = loadImage(
+    "images/rock.png",
+    () => console.log("rock loaded"),
+    () => console.log("rock FAILED")
+  );
 }
 
 function setup() {
