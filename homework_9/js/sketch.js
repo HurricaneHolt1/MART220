@@ -10,11 +10,14 @@ let gameState = "play";
 function setup() {
   new Canvas(800, 600);
 
-  // player
+  textSize(24);
+  textAlign(LEFT);
+
+  // PLAYER
   player = new Sprite(400, 300, 50, 50);
   player.color = "red";
 
-  // rocks
+  // OBSTACLES
   for (let i = 0; i < 3; i++) {
     let rock = new Sprite(
       random(100, 700),
@@ -27,7 +30,7 @@ function setup() {
     obstacles.push(rock);
   }
 
-  // good pizzas
+  // GOOD PIZZAS
   for (let i = 0; i < 5; i++) {
     let pizza = new Sprite(
       random(50, 750),
@@ -39,7 +42,7 @@ function setup() {
     pizzas.push(pizza);
   }
 
-  // bad pizzas
+  // BAD PIZZAS
   for (let i = 0; i < 3; i++) {
     let bad = new Sprite(
       random(50, 750),
@@ -58,7 +61,7 @@ function draw() {
   if (gameState === "play") {
     handleMovement();
 
-    // collect good pizzas
+    // GOOD PIZZA COLLECTION
     for (let pizza of pizzas) {
       if (player.overlaps(pizza)) {
         score++;
@@ -67,7 +70,7 @@ function draw() {
       }
     }
 
-    // hit bad pizzas
+    // BAD PIZZA HIT
     for (let bad of badPizzas) {
       if (player.overlaps(bad)) {
         health--;
@@ -76,14 +79,21 @@ function draw() {
       }
     }
 
-    fill(0);
-    textSize(24);
-    text("Score: " + score, 20, 30);
-    text("Health: " + health, 20, 60);
+    // WIN / LOSE
+    if (score >= 10) {
+      gameState = "win";
+    }
 
-    if (score >= 10) gameState = "win";
-    if (health <= 0) gameState = "lose";
+    if (health <= 0) {
+      gameState = "lose";
+    }
   }
+
+  // DRAW UI LAST SO IT SHOWS ON TOP
+  fill(0);
+  textSize(24);
+  text("Score: " + score, 20, 30);
+  text("Health: " + health, 20, 60);
 
   if (gameState === "win") {
     textSize(50);
@@ -99,21 +109,26 @@ function draw() {
 }
 
 function handleMovement() {
+  // IMPORTANT RESET
   player.vel.x = 0;
   player.vel.y = 0;
 
+  // LEFT
   if (kb.pressing("left") || kb.pressing("a")) {
     player.vel.x = -4;
   }
 
+  // RIGHT
   if (kb.pressing("right") || kb.pressing("d")) {
     player.vel.x = 4;
   }
 
+  // UP
   if (kb.pressing("up") || kb.pressing("w")) {
     player.vel.y = -4;
   }
 
+  // DOWN
   if (kb.pressing("down") || kb.pressing("s")) {
     player.vel.y = 4;
   }
