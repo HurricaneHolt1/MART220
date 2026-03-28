@@ -14,8 +14,11 @@ let pizzaImg;
 let badPizzaImg;
 let rockImg;
 
-// manual key tracking — bypasses p5.play kb
+// manual key tracking
 let keys = {};
+
+// track player position from previous frame for solid collision
+let prevX, prevY;
 
 function preload() {
   ninjaIdle   = loadImage("images/ninja_idle.png");
@@ -29,10 +32,8 @@ function preload() {
 function setup() {
   new Canvas(800, 600);
 
-  // keyboard listeners on window — no click/focus needed
   window.addEventListener("keydown", function(e) {
     keys[e.key] = true;
-    // prevent arrow keys from scrolling the page
     if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
       e.preventDefault();
     }
@@ -45,6 +46,8 @@ function setup() {
   player = new Sprite(400, 300, 40, 40, "none");
   player.img = ninjaIdle;
   player.scale = 0.4;
+  prevX = player.x;
+  prevY = player.y;
 
   // ROCK GROUP
   rockGroup = new Group();
@@ -72,6 +75,8 @@ function setup() {
     pizza.collider = "none";
     pizza.width = 30;
     pizza.height = 30;
+    pizza._vx = random([-1.5, 1.5]);
+    pizza._vy = random([-1.5, 1.5]);
   }
 
   // BAD PIZZA GROUP
@@ -86,9 +91,8 @@ function setup() {
     bad.collider = "none";
     bad.width = 30;
     bad.height = 30;
-    // random patrol velocity
-    bad._vx = random(-1, 1) < 0 ? -2 : 2;
-    bad._vy = random(-1, 1) < 0 ? -2 : 2;
+    bad._vx = random([-2, 2]);
+    bad._vy = random([-2, 2]);
   }
 }
 
@@ -96,8 +100,12 @@ function draw() {
   background(220);
 
   if (gameState === "play") {
+    // save position before moving
+    prevX = player.x;
+    prevY = player.y;
+
     handleMovement();
-    moveBadPizzas();
+    movePizzas();
     checkCollisions();
 
     if (score >= 10) gameState = "win";
@@ -157,44 +165,60 @@ function handleMovement() {
   }
 }
 
-function moveBadPizzas() {
+function movePizzas() {
+  // move good pizzas and bounce off edges
+  for (let pizza of pizzaGroup) {
+    pizza.x += pizza._vx;
+    pizza.y += pizza._vy;
+    if (pizza.x < 20 || pizza.x > width  - 20) pizza._vx *= -1;
+    if (pizza.y < 20 || pizza.y > height - 20) pizza._vy *= -1;
+  }
+
+  // move bad pizzas and bounce off edges
   for (let bad of badPizzaGroup) {
     bad.x += bad._vx;
     bad.y += bad._vy;
-
-    // bounce off edges
     if (bad.x < 20 || bad.x > width  - 20) bad._vx *= -1;
     if (bad.y < 20 || bad.y > height - 20) bad._vy *= -1;
   }
 }
 
 function checkCollisions() {
-  let pw = 20; // player half-width
-  let ph = 20; // player half-height
+  let pw = 18;
+  let ph = 18;
 
-  // rocks — push player back out
+  // ROCKS — solid: push player back to previous position
   for (let rock of rockGroup) {
-    if (rectsOverlap(player.x, player.y, pw, ph, rock.x, rock.y, 27, 27)) {
-      // simple push back to previous position
-      if (keys["ArrowLeft"]  || keys["a"]) player.x += 4;
-      if (keys["ArrowRight"] || keys["d"]) player.x -= 4;
-      if (keys["ArrowUp"]    || keys["w"]) player.y += 4;
-      if (keys["ArrowDown"]  || keys["s"]) player.y -= 4;
+    if (rectsOverlap(player.x, player.y, pw, ph, rock.x, rock.y, 25, 25)) {
+      // try restoring just X first
+      let testX = prevX;
+      if (!rectsOverlap(testX, player.y, pw, ph, rock.x, rock.y, 25, 25)) {
+        player.x = testX;
+      }
+      // try restoring just Y
+      else if (!rectsOverlap(player.x, prevY, pw, ph, rock.x, rock.y, 25, 25)) {
+        player.y = prevY;
+      }
+      // restore both
+      else {
+        player.x = prevX;
+        player.y = prevY;
+      }
     }
   }
 
-  // good pizzas
+  // GOOD PIZZAS — collect
   for (let pizza of pizzaGroup) {
-    if (rectsOverlap(player.x, player.y, pw, ph, pizza.x, pizza.y, 15, 15)) {
+    if (rectsOverlap(player.x, player.y, pw, ph, pizza.x, pizza.y, 13, 13)) {
       score++;
       pizza.x = random(50, 750);
       pizza.y = random(50, 550);
     }
   }
 
-  // bad pizzas
+  // BAD PIZZAS — damage
   for (let bad of badPizzaGroup) {
-    if (rectsOverlap(player.x, player.y, pw, ph, bad.x, bad.y, 15, 15)) {
+    if (rectsOverlap(player.x, player.y, pw, ph, bad.x, bad.y, 13, 13)) {
       health--;
       bad.x = random(50, 750);
       bad.y = random(50, 550);
@@ -202,7 +226,7 @@ function checkCollisions() {
   }
 }
 
-// axis-aligned bounding box overlap check
+// axis-aligned bounding box overlap
 function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
   return abs(ax - bx) < (aw + bw) && abs(ay - by) < (ah + bh);
 }
