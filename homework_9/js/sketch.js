@@ -1,28 +1,36 @@
 let player;
+let keys = {};
 
 function setup() {
   new Canvas(800, 600);
   player = new Sprite(400, 300, 40, 40, "none");
   player.color = "red";
+
+  // attach key listeners directly to the window
+  window.addEventListener("keydown", function(e) {
+    keys[e.key] = true;
+  });
+  window.addEventListener("keyup", function(e) {
+    keys[e.key] = false;
+  });
 }
 
 function draw() {
   background(220);
 
-  // Use plain p5.js keyIsDown instead of kb.pressing
-  if (keyIsDown(LEFT_ARROW)  || keyIsDown(65))  player.x -= 4; // 65 = A
-  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68))  player.x += 4; // 68 = D
-  if (keyIsDown(UP_ARROW)    || keyIsDown(87))  player.y -= 4; // 87 = W
-  if (keyIsDown(DOWN_ARROW)  || keyIsDown(83))  player.y += 4; // 83 = S
+  if (keys["ArrowLeft"]  || keys["a"]) player.x -= 4;
+  if (keys["ArrowRight"] || keys["d"]) player.x += 4;
+  if (keys["ArrowUp"]    || keys["w"]) player.y -= 4;
+  if (keys["ArrowDown"]  || keys["s"]) player.y += 4;
 
   fill(0);
   noStroke();
   textSize(16);
   textAlign(LEFT);
-  text("keyIsDown LEFT:  " + keyIsDown(LEFT_ARROW),  20, 30);
-  text("keyIsDown RIGHT: " + keyIsDown(RIGHT_ARROW), 20, 50);
-  text("keyIsDown UP:    " + keyIsDown(UP_ARROW),    20, 70);
-  text("keyIsDown DOWN:  " + keyIsDown(DOWN_ARROW),  20, 90);
+  text("ArrowLeft:  " + !!keys["ArrowLeft"],  20, 30);
+  text("ArrowRight: " + !!keys["ArrowRight"], 20, 50);
+  text("ArrowUp:    " + !!keys["ArrowUp"],    20, 70);
+  text("ArrowDown:  " + !!keys["ArrowDown"],  20, 90);
   text("x: " + round(player.x) + "  y: " + round(player.y), 20, 110);
-  text("Click canvas then press arrow keys or WASD", 20, 140);
+  text("Press arrow keys - no click needed", 20, 140);
 }
