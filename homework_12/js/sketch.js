@@ -6,20 +6,21 @@ let angle5 = 0;
 
 let titleGraphics;
 let nameGraphics;
+let textAngle = 0; // rotation for floating effect
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
 
-  // --- TITLE TEXT ---
+  // --- TITLE OFFSCREEN GRAPHICS ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.background(30); // match the canvas background
+  titleGraphics.background(30); // match canvas background
   titleGraphics.fill(255);
   titleGraphics.textSize(48);
   titleGraphics.textAlign(CENTER, CENTER);
   titleGraphics.text("3D Exploration", 200, 50);
   titleGraphics.textFont('Arial');
 
-  // --- NAME TEXT ---
+  // --- NAME OFFSCREEN GRAPHICS ---
   nameGraphics = createGraphics(400, 100);
   nameGraphics.background(30); // match canvas background
   nameGraphics.fill(255);
@@ -81,17 +82,23 @@ function draw() {
   angle4 += 0.018;
   angle5 += 0.013;
 
-  // ----- FLOATING TEXT -----
+  // ----- FLOATING TEXT (WITH ROTATION) -----
+  textAngle += 0.005; // slow rotation
+
+  // Title
   push();
   translate(0, -height / 2 + 80, 0);
   rotateX(-PI / 6);
+  rotateY(textAngle);
   texture(titleGraphics);
   plane(400, 100);
   pop();
 
+  // Name
   push();
   translate(0, height / 2 - 80, 0);
   rotateX(-PI / 6);
+  rotateY(-textAngle); // opposite direction for contrast
   texture(nameGraphics);
   plane(400, 100);
   pop();
