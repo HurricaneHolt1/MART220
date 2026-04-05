@@ -49,6 +49,7 @@ function draw() {
   push();
   translate(150, -150, -100);
   rotateY(angle2);
+  shininess(100);
   specularMaterial(50, 200, 50);
   sphere(60);
   pop();
@@ -71,6 +72,7 @@ function draw() {
   translate(0, 0, 200);
   rotateX(angle5);
   rotateY(angle5 * 0.5);
+  shininess(100);
   specularMaterial(200, 200, 50);
   torus(70, 20);
   pop();
