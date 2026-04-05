@@ -1,255 +1,256 @@
 // ===== GLOBAL VARIABLES =====
-let ninja;
-let goodPizzas = [];
-let badPizzas = [];
-let thrownPizzas = [];
+let player;
+let pizzaGroup;
+let badPizzaGroup;
+let rockGroup;
 let particles = [];
+let attacks = [];
+
 let score = 0;
-let gameOver = false;
+let health = 5;
+let gameState = "play";
 
-// Sprites
 let ninjaIdle, ninjaWalk1, ninjaWalk2;
-let goodPizzaImg, badPizzaImg;
+let pizzaImg, badPizzaImg, rockImg, attackImg;
 
+let keys = {};
+let prevX, prevY;
+
+// ===== PRELOAD IMAGES =====
 function preload() {
-  ninjaIdle = loadImage('assets/ninja_idle.png');
-  ninjaWalk1 = loadImage('assets/ninja_walk1.png');
-  ninjaWalk2 = loadImage('assets/ninja_walk2.png');
-  goodPizzaImg = loadImage('assets/goodPizza.png');
-  badPizzaImg = loadImage('assets/badPizza.png');
+  ninjaIdle   = loadImage("images/ninja_idle.png");
+  ninjaWalk1  = loadImage("images/ninja_walk1.png");
+  ninjaWalk2  = loadImage("images/ninja_walk2.png");
+  pizzaImg    = loadImage("images/pizza.png");
+  badPizzaImg = loadImage("images/bad_pizza.png");
+  rockImg     = loadImage("images/rock.png");
+  attackImg   = loadImage("images/pizza.png"); // use same pizza image as projectile
 }
 
 function setup() {
   createCanvas(800, 600);
 
-  // Ninja
-  ninja = new Ninja(
-    width / 2, 
-    height - 50, 
-    ninjaIdle, 
-    [ninjaWalk1, ninjaWalk2]
-  );
+  // key tracking
+  window.addEventListener("keydown", e => keys[e.key] = true);
+  window.addEventListener("keyup", e => keys[e.key] = false);
 
-  // Good pizzas
-  for (let i = 0; i < 5; i++) {
-    goodPizzas.push(new PizzaItem(random(50, width-50), random(50, height-150), true));
+  // ===== PLAYER =====
+  player = new Sprite(400, 300, 40, 40);
+  player.img = ninjaIdle;
+  player.scale = 0.4;
+  prevX = player.x;
+  prevY = player.y;
+
+  // ===== ROCK GROUP =====
+  rockGroup = new Group();
+  for(let i=0;i<3;i++){
+    let rock = new Sprite(random(100,700), random(100,500), 55, 55);
+    rock.img = rockImg;
+    rock.scale = 0.3;
+    rockGroup.add(rock);
   }
 
-  // Bad pizzas
-  for (let i = 0; i < 5; i++) {
-    badPizzas.push(new PizzaItem(random(50, width-50), random(50, height/2), false));
+  // ===== GOOD PIZZA GROUP =====
+  pizzaGroup = new Group();
+  for(let i=0;i<5;i++){
+    let pizza = new Sprite(random(50,750), random(50,550), 30, 30);
+    pizza.img = pizzaImg;
+    pizza.scale = 0.2;
+    pizza._vx = random([-1.5, 1.5]);
+    pizza._vy = random([-1.5, 1.5]);
+    pizzaGroup.add(pizza);
+  }
+
+  // ===== BAD PIZZA GROUP =====
+  badPizzaGroup = new Group();
+  for(let i=0;i<3;i++){
+    let bad = new Sprite(random(50,750), random(50,550), 30, 30);
+    bad.img = badPizzaImg;
+    bad.scale = 0.2;
+    bad._vx = random([-2,2]);
+    bad._vy = random([-2,2]);
+    bad.health = 3;
+    badPizzaGroup.add(bad);
   }
 }
 
 function draw() {
-  background(50, 150, 200);
+  background(220);
 
-  if (!gameOver) {
-    ninja.update();
-    ninja.display();
+  if(gameState==="play"){
+    prevX = player.x;
+    prevY = player.y;
 
-    // Thrown pizzas
-    for (let i = thrownPizzas.length - 1; i >= 0; i--) {
-      thrownPizzas[i].update();
-      thrownPizzas[i].display();
-
-      for (let j = badPizzas.length - 1; j >= 0; j--) {
-        if (thrownPizzas[i].hits(badPizzas[j])) {
-          attackPizza(badPizzas[j]);
-          thrownPizzas.splice(i, 1);
-          break;
-        }
-      }
-
-      if (i < thrownPizzas.length && thrownPizzas[i].offscreen()) {
-        thrownPizzas.splice(i, 1);
-      }
-    }
-
-    // Good pizzas
-    for (let i = goodPizzas.length - 1; i >= 0; i--) {
-      goodPizzas[i].display();
-      if (ninja.collides(goodPizzas[i])) {
-        score += 10;
-        goodPizzas.splice(i, 1);
-      }
-    }
-
-    // Bad pizzas
-    for (let i = badPizzas.length - 1; i >= 0; i--) {
-      badPizzas[i].update();
-      badPizzas[i].display();
-    }
-
-    // Particles
+    handleMovement();
+    movePizzas();
+    handleAttacks();
+    checkCollisions();
     updateParticles();
 
-    // Score
+    if(badPizzaGroup.length===0) gameState="win";
+    if(health<=0) gameState="lose";
+  }
+
+  // UI
+  fill(0);
+  textSize(24);
+  textAlign(LEFT);
+  text("Score: "+score, 20,30);
+  text("Health: "+health,20,60);
+
+  if(gameState==="win"){
+    fill(0,180,0,180);
+    rect(0,0,width,height);
     fill(255);
+    textSize(60);
+    textAlign(CENTER,CENTER);
+    text("YOU WIN!", width/2, height/2);
     textSize(24);
-    text("Score: " + score, 20, 30);
+    text("Refresh to play again", width/2, height/2+60);
+  }
 
-    // Win check
-    checkWin();
-  } else {
-    fill(255, 255, 0);
-    textSize(48);
-    textAlign(CENTER, CENTER);
-    text("You Win!", width/2, height/2);
+  if(gameState==="lose"){
+    fill(180,0,0,180);
+    rect(0,0,width,height);
+    fill(255);
+    textSize(60);
+    textAlign(CENTER,CENTER);
+    text("GAME OVER", width/2, height/2);
+    textSize(24);
+    text("Refresh to play again", width/2, height/2+60);
   }
 }
 
-// ===== NINJA CLASS =====
-class Ninja {
-  constructor(x, y, idleImg, walkImgs) {
-    this.pos = createVector(x, y);
-    this.size = 50;
-    this.speed = 5;
+// ===== PLAYER MOVEMENT & ANIMATION =====
+function handleMovement(){
+  let moving=false;
 
-    this.idleImg = idleImg;
-    this.walkImgs = walkImgs;
+  if(keys["ArrowLeft"]||keys["a"]){ player.x-=4; moving=true; player.facing=-1; }
+  if(keys["ArrowRight"]||keys["d"]){ player.x+=4; moving=true; player.facing=1; }
+  if(keys["ArrowUp"]||keys["w"]){ player.y-=4; moving=true; }
+  if(keys["ArrowDown"]||keys["s"]){ player.y+=4; moving=true; }
 
-    this.currentFrame = 0;
-    this.frameCounter = 0;
-    this.isMoving = false;
+  player.x = constrain(player.x,20,width-20);
+  player.y = constrain(player.y,20,height-20);
+
+  player.img = moving ? (frameCount%20<10?ninjaWalk1:ninjaWalk2) : ninjaIdle;
+
+  // attack
+  if(keys[" "]) fireAttack();
+}
+
+// ===== MOVE PIZZAS =====
+function movePizzas(){
+  for(let pizza of pizzaGroup){
+    pizza.x += pizza._vx;
+    pizza.y += pizza._vy;
+    if(pizza.x<20||pizza.x>width-20) pizza._vx*=-1;
+    if(pizza.y<20||pizza.y>height-20) pizza._vy*=-1;
   }
 
-  update() {
-    this.isMoving = false;
+  for(let bad of badPizzaGroup){
+    bad.x += bad._vx;
+    bad.y += bad._vy;
+    if(bad.x<20||bad.x>width-20) bad._vx*=-1;
+    if(bad.y<20||bad.y>height-20) bad._vy*=-1;
 
-    if (keyIsDown(LEFT_ARROW)) { this.pos.x -= this.speed; this.isMoving = true; }
-    if (keyIsDown(RIGHT_ARROW)) { this.pos.x += this.speed; this.isMoving = true; }
-    if (keyIsDown(UP_ARROW)) { this.pos.y -= this.speed; this.isMoving = true; }
-    if (keyIsDown(DOWN_ARROW)) { this.pos.y += this.speed; this.isMoving = true; }
-
-    this.pos.x = constrain(this.pos.x, 0, width);
-    this.pos.y = constrain(this.pos.y, 0, height);
-
-    if (this.isMoving) {
-      this.frameCounter++;
-      if (this.frameCounter % 10 === 0) {
-        this.currentFrame = (this.currentFrame + 1) % this.walkImgs.length;
-      }
-    } else {
-      this.currentFrame = 0;
-    }
-  }
-
-  display() {
-    imageMode(CENTER);
-    if (this.isMoving) {
-      image(this.walkImgs[this.currentFrame], this.pos.x, this.pos.y, this.size, this.size);
-    } else {
-      image(this.idleImg, this.pos.x, this.pos.y, this.size, this.size);
-    }
-  }
-
-  collides(item) {
-    let d = dist(this.pos.x, this.pos.y, item.pos.x, item.pos.y);
-    return d < (this.size/2 + item.size/2);
+    if(random(1)<0.02){ bad._vx=random([-2,2]); bad._vy=random([-2,2]); }
   }
 }
 
-// ===== PIZZA ITEM =====
-class PizzaItem {
-  constructor(x, y, isGood) {
-    this.pos = createVector(x, y);
-    this.size = 30;
-    this.health = isGood ? 0 : 3;
-    this.isGood = isGood;
-
-    if (!isGood) {
-      this.vel = p5.Vector.random2D();
-      this.vel.setMag(random(1, 2));
-    } else {
-      this.vel = createVector(0, 0);
-    }
+// ===== ATTACKS =====
+function fireAttack(){
+  if(frameCount % 10 === 0){ // fire rate
+    let attack = new Sprite(player.x, player.y, 20, 20);
+    attack.img = attackImg;
+    attack.scale = 0.2;
+    attack.vel = createVector(player.facing*6,0);
+    attacks.push(attack);
   }
+}
 
-  update() {
-    if (!this.isGood) {
-      this.pos.add(this.vel);
+function handleAttacks(){
+  for(let i=attacks.length-1;i>=0;i--){
+    let atk = attacks[i];
+    atk.position.add(atk.vel);
 
-      if (this.pos.x < 0 || this.pos.x > width) this.vel.x *= -1;
-      if (this.pos.y < 0 || this.pos.y > height/2) this.vel.y *= -1;
+    // remove offscreen
+    if(atk.position.x<0 || atk.position.x>width){
+      attacks.splice(i,1);
+      continue;
+    }
 
-      if (random(1) < 0.02) {
-        this.vel = p5.Vector.random2D();
-        this.vel.setMag(random(1, 2));
+    // hit bad pizzas
+    for(let j=badPizzaGroup.length-1;j>=0;j--){
+      let bad = badPizzaGroup[j];
+      if(rectsOverlap(atk.position.x, atk.position.y, 15,15, bad.x,bad.y,30,30)){
+        bad.health--;
+        for(let k=0;k<10;k++) particles.push(new Particle(bad.x,bad.y));
+        attacks.splice(i,1);
+
+        if(bad.health<=0) badPizzaGroup.remove(bad);
+        break;
       }
     }
   }
 
-  display() {
-    imageMode(CENTER);
-    if (this.isGood) {
-      image(goodPizzaImg, this.pos.x, this.pos.y, this.size, this.size);
-    } else {
-      image(badPizzaImg, this.pos.x, this.pos.y, this.size, this.size);
-    }
+  // draw attacks
+  for(let atk of attacks){
+    image(atk.img, atk.position.x, atk.position.y, atk.width, atk.height);
   }
 }
 
-// ===== THROWN PIZZA =====
-class ThrownPizza {
-  constructor(x, y) {
-    this.pos = createVector(x, y);
-    this.vel = createVector(0, -7);
-    this.size = 20;
+// ===== COLLISIONS =====
+function checkCollisions(){
+  let pw=18, ph=18;
+
+  for(let rock of rockGroup){
+    if(rectsOverlap(player.x,player.y,pw,ph,rock.x,rock.y,25,25)){
+      player.x=prevX;
+      player.y=prevY;
+    }
   }
 
-  update() { this.pos.add(this.vel); }
-  display() { fill('orange'); ellipse(this.pos.x, this.pos.y, this.size); }
-
-  hits(pizzaItem) {
-    let d = dist(this.pos.x, this.pos.y, pizzaItem.pos.x, pizzaItem.pos.y);
-    return d < (this.size/2 + pizzaItem.size/2);
+  for(let pizza of pizzaGroup){
+    if(rectsOverlap(player.x,player.y,pw,ph,pizza.x,pizza.y,13,13)){
+      score++;
+      pizza.x=random(50,750);
+      pizza.y=random(50,550);
+    }
   }
 
-  offscreen() { return this.pos.y < 0; }
+  for(let bad of badPizzaGroup){
+    if(rectsOverlap(player.x,player.y,pw,ph,bad.x,bad.y,13,13)){
+      health--;
+      bad.x=random(50,750);
+      bad.y=random(50,550);
+      for(let i=0;i<10;i++) particles.push(new Particle(player.x,player.y));
+    }
+  }
 }
 
 // ===== PARTICLE SYSTEM =====
-class Particle {
-  constructor(x, y) {
-    this.pos = createVector(x, y);
-    this.vel = p5.Vector.random2D();
-    this.vel.mult(random(2, 5));
-    this.lifespan = 255;
-    this.size = random(5, 10);
+class Particle{
+  constructor(x,y){
+    this.pos=createVector(x,y);
+    this.vel=p5.Vector.random2D().mult(random(2,5));
+    this.lifespan=255;
+    this.size=random(5,10);
   }
-
-  update() { this.pos.add(this.vel); this.lifespan -= 5; }
-  display() { noStroke(); fill(255, 150, 0, this.lifespan); ellipse(this.pos.x, this.pos.y, this.size); }
-  isDead() { return this.lifespan <= 0; }
+  update(){ this.pos.add(this.vel); this.lifespan-=5; }
+  display(){ noStroke(); fill(255,150,0,this.lifespan); ellipse(this.pos.x,this.pos.y,this.size); }
+  isDead(){ return this.lifespan<=0; }
 }
 
-function attackPizza(pizza) {
-  pizza.health -= 1;
-  for (let i = 0; i < 15; i++) {
-    particles.push(new Particle(pizza.pos.x, pizza.pos.y));
-  }
-  if (pizza.health <= 0) {
-    let index = badPizzas.indexOf(pizza);
-    if (index > -1) badPizzas.splice(index, 1);
-  }
-}
-
-function updateParticles() {
-  for (let i = particles.length - 1; i >= 0; i--) {
+function updateParticles(){
+  for(let i=particles.length-1;i>=0;i--){
     particles[i].update();
     particles[i].display();
-    if (particles[i].isDead()) particles.splice(i, 1);
+    if(particles[i].isDead()) particles.splice(i,1);
   }
 }
 
-function checkWin() {
-  if (badPizzas.length === 0) gameOver = true;
-}
-
-// ===== THROW PIZZA =====
-function keyPressed() {
-  if (key === ' ') {
-    thrownPizzas.push(new ThrownPizza(ninja.pos.x, ninja.pos.y - ninja.size/2));
-  }
+// ===== HELPER =====
+function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){
+  return abs(ax-bx)<(aw+bw) && abs(ay-by)<(ah+bh);
 }
