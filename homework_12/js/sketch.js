@@ -12,8 +12,7 @@ function setup() {
 
   // --- TITLE TEXT ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.clear(); // clear first
-  titleGraphics.background(0, 0, 0, 1); // 1 alpha, almost invisible
+  titleGraphics.background(30); // match the canvas background
   titleGraphics.fill(255);
   titleGraphics.textSize(48);
   titleGraphics.textAlign(CENTER, CENTER);
@@ -22,8 +21,7 @@ function setup() {
 
   // --- NAME TEXT ---
   nameGraphics = createGraphics(400, 100);
-  nameGraphics.clear();
-  nameGraphics.background(0, 0, 0, 1); // 1 alpha
+  nameGraphics.background(30); // match canvas background
   nameGraphics.fill(255);
   nameGraphics.textSize(32);
   nameGraphics.textAlign(CENTER, CENTER);
