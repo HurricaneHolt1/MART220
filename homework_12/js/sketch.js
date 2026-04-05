@@ -4,8 +4,28 @@ let angle3 = 0;
 let angle4 = 0;
 let angle5 = 0;
 
+// For text textures
+let titleGraphics;
+let nameGraphics;
+
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
+
+  // Create offscreen graphics for title
+  titleGraphics = createGraphics(400, 100);
+  titleGraphics.background(0, 0);
+  titleGraphics.fill(255);
+  titleGraphics.textSize(48);
+  titleGraphics.textAlign(CENTER, CENTER);
+  titleGraphics.text("3D Exploration", 200, 50);
+
+  // Create offscreen graphics for name
+  nameGraphics = createGraphics(400, 100);
+  nameGraphics.background(0, 0);
+  nameGraphics.fill(255);
+  nameGraphics.textSize(32);
+  nameGraphics.textAlign(CENTER, CENTER);
+  nameGraphics.text("By Josh Holt", 200, 50);
 }
 
 function draw() {
@@ -63,4 +83,20 @@ function draw() {
   angle3 += 0.015;
   angle4 += 0.018;
   angle5 += 0.013;
+
+  // ----- TITLE TEXT -----
+  push();
+  translate(0, -height / 2 + 80, 0);
+  rotateX(-PI / 6);
+  texture(titleGraphics);
+  plane(400, 100);
+  pop();
+
+  // ----- NAME TEXT -----
+  push();
+  translate(0, height / 2 - 80, 0);
+  rotateX(-PI / 6);
+  texture(nameGraphics);
+  plane(400, 100);
+  pop();
 }
