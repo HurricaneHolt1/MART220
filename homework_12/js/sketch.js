@@ -12,7 +12,7 @@ function setup() {
 
   // --- TITLE TEXT ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.clear; // match the canvas background
+  titleGraphics.background(30); // match the canvas background
   titleGraphics.fill(255);
   titleGraphics.textFont('Arial');
   titleGraphics.textSize(48);
@@ -21,7 +21,7 @@ function setup() {
  
   // --- NAME TEXT ---
   nameGraphics = createGraphics(400, 100);
-  nameGraphics.clear; // match canvas background
+  nameGraphics.background(30); // match canvas background
   nameGraphics.fill(255);
   nameGraphics.textFont('Arial');
   nameGraphics.textSize(32);
