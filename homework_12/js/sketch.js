@@ -12,7 +12,8 @@ function setup() {
 
   // --- TITLE TEXT ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.background(0, 0); // fully transparent background
+  titleGraphics.clear(); // clear first
+  titleGraphics.background(0, 0, 0, 1); // 1 alpha, almost invisible
   titleGraphics.fill(255);
   titleGraphics.textSize(48);
   titleGraphics.textAlign(CENTER, CENTER);
@@ -21,7 +22,8 @@ function setup() {
 
   // --- NAME TEXT ---
   nameGraphics = createGraphics(400, 100);
-  nameGraphics.background(0, 0); // fully transparent background
+  nameGraphics.clear();
+  nameGraphics.background(0, 0, 0, 1); // 1 alpha
   nameGraphics.fill(255);
   nameGraphics.textSize(32);
   nameGraphics.textAlign(CENTER, CENTER);
