@@ -25,7 +25,7 @@ function setup() {
   nameGraphics.fill(255);
   nameGraphics.textSize(32);
   nameGraphics.textAlign(CENTER, CENTER);
-  nameGraphics.text("By Your Name", 200, 50);
+  nameGraphics.text("By Josh Holt", 200, 50);
   nameGraphics.textFont('Arial');
 }
 
