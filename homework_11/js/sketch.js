@@ -1,22 +1,26 @@
 let player;
-let pizzaGroup;
-let badPizzaGroup;
-let rockGroup;
-let particleGroup;
+let pizzaGroup, badPizzaGroup, rockGroup;
+let particles = [];
 
 let score = 0;
 let health = 5;
 let gameState = "play";
 
+// ninja animations
 let ninjaIdle, ninjaWalk1, ninjaWalk2;
+// images
 let pizzaImg, badPizzaImg, rockImg;
 
+// keys tracking
 let keys = {};
+let prevX, prevY;
 
 function preload() {
-  ninjaIdle   = loadImage("images/ninja_idle.png");
-  ninjaWalk1  = loadImage("images/ninja_walk1.png");
-  ninjaWalk2  = loadImage("images/ninja_walk2.png");
+  // load as animations for older p5.play
+  ninjaIdle   = loadAnimation("images/ninja_idle.png");
+  ninjaWalk1  = loadAnimation("images/ninja_walk1.png");
+  ninjaWalk2  = loadAnimation("images/ninja_walk2.png");
+
   pizzaImg    = loadImage("images/pizza.png");
   badPizzaImg = loadImage("images/bad_pizza.png");
   rockImg     = loadImage("images/rock.png");
@@ -25,193 +29,192 @@ function preload() {
 function setup() {
   createCanvas(800, 600);
 
-  // Player sprite
-  player = createSprite(400, 300, 40, 40);
-  player.addImage("idle", ninjaIdle);
-  player.addImage("walk1", ninjaWalk1);
-  player.addImage("walk2", ninjaWalk2);
-  player.changeImage("idle");
-  player.scale = 0.4;
+  // keyboard tracking
+  window.addEventListener("keydown", e => keys[e.key] = true);
+  window.addEventListener("keyup", e => keys[e.key] = false);
 
-  // Rocks
+  // PLAYER
+  player = createSprite(400, 300, 40, 40);
+  player.addAnimation("idle", ninjaIdle);
+  player.addAnimation("walk1", ninjaWalk1);
+  player.addAnimation("walk2", ninjaWalk2);
+  player.changeAnimation("idle");
+  player.scale = 0.4;
+  prevX = player.position.x;
+  prevY = player.position.y;
+
+  // ROCKS
   rockGroup = new Group();
   for (let i = 0; i < 3; i++) {
-    let rock = createSprite(random(100, 700), random(100, 500));
+    let rock = createSprite(random(100, 700), random(100, 500), 55, 55);
     rock.addImage(rockImg);
     rock.scale = 0.3;
     rockGroup.add(rock);
   }
 
-  // Good pizza
+  // GOOD PIZZAS
   pizzaGroup = new Group();
   for (let i = 0; i < 5; i++) {
-    let pizza = createSprite(random(50, 750), random(50, 550));
+    let pizza = createSprite(random(50, 750), random(50, 550), 30, 30);
     pizza.addImage(pizzaImg);
     pizza.scale = 0.2;
-    pizza.setSpeed(random(1, 2), random(0, 360));
+    pizza._vx = random([-1.5, 1.5]);
+    pizza._vy = random([-1.5, 1.5]);
     pizzaGroup.add(pizza);
   }
 
-  // Bad pizza
+  // BAD PIZZAS
   badPizzaGroup = new Group();
   for (let i = 0; i < 3; i++) {
-    let bad = createSprite(random(50, 750), random(50, 550));
+    let bad = createSprite(random(50, 750), random(50, 550), 30, 30);
     bad.addImage(badPizzaImg);
     bad.scale = 0.2;
-    bad.setSpeed(random(1, 2), random(0, 360));
-    bad.health = 3; // bad pizza takes 3 hits
+    bad._vx = random([-2, 2]);
+    bad._vy = random([-2, 2]);
+    bad.health = 3;
     badPizzaGroup.add(bad);
   }
-
-  // Particles
-  particleGroup = new Group();
-}
-
-// Key press tracking
-function keyPressed() {
-  keys[key] = true;
-
-  // Attack with spacebar
-  if (key === " ") {
-    attack();
-  }
-}
-
-function keyReleased() {
-  keys[key] = false;
 }
 
 function draw() {
   background(220);
 
   if (gameState === "play") {
+    prevX = player.position.x;
+    prevY = player.position.y;
+
     handleMovement();
     movePizzas();
     checkCollisions();
+    handleParticles();
+
+    if (badPizzaGroup.length === 0) gameState = "win";
+    if (health <= 0) gameState = "lose";
   }
 
   drawSprites();
-  drawUI();
-}
 
-function handleMovement() {
-  let moving = false;
-
-  if (keys["ArrowLeft"]  || keys["a"]) { player.position.x -= 4; moving = true; }
-  if (keys["ArrowRight"] || keys["d"]) { player.position.x += 4; moving = true; }
-  if (keys["ArrowUp"]    || keys["w"]) { player.position.y -= 4; moving = true; }
-  if (keys["ArrowDown"]  || keys["s"]) { player.position.y += 4; moving = true; }
-
-  player.position.x = constrain(player.position.x, 20, width - 20);
-  player.position.y = constrain(player.position.y, 20, height - 20);
-
-  // Ninja walk animation
-  if (moving) {
-    player.changeImage(frameCount % 20 < 10 ? "walk1" : "walk2");
-  } else {
-    player.changeImage("idle");
-  }
-}
-
-function movePizzas() {
-  // bounce pizzas off walls
-  pizzaGroup.forEach(p => {
-    if (p.position.x < 20 || p.position.x > width - 20) p.velocity.x *= -1;
-    if (p.position.y < 20 || p.position.y > height - 20) p.velocity.y *= -1;
-  });
-
-  badPizzaGroup.forEach(b => {
-    if (b.position.x < 20 || b.position.x > width - 20) b.velocity.x *= -1;
-    if (b.position.y < 20 || b.position.y > height - 20) b.velocity.y *= -1;
-  });
-}
-
-function checkCollisions() {
-  // Player & rocks
-  rockGroup.forEach(rock => {
-    player.collide(rock);
-  });
-
-  // Player & good pizza
-  pizzaGroup.forEach(p => {
-    if (player.overlap(p)) {
-      score++;
-      p.position.x = random(50, 750);
-      p.position.y = random(50, 550);
-      // optional: small particles when collecting good pizza
-      spawnParticles(p.position.x, p.position.y, color(0, 255, 0));
-    }
-  });
-
-  // Player & bad pizza (damage)
-  badPizzaGroup.forEach(b => {
-    if (player.overlap(b)) {
-      health--;
-      b.position.x = random(50, 750);
-      b.position.y = random(50, 550);
-    }
-  });
-
-  // Particles lifetime
-  particleGroup.forEach(p => {
-    p.lifetime--;
-    if (p.lifetime <= 0) {
-      p.remove();
-    }
-  });
-}
-
-// Attack function
-function attack() {
-  // check overlap with bad pizzas
-  badPizzaGroup.forEach(b => {
-    let d = dist(player.position.x, player.position.y, b.position.x, b.position.y);
-    if (d < 50) { // attack radius
-      b.health--;
-      spawnParticles(b.position.x, b.position.y, color(255, 0, 0));
-      if (b.health <= 0) {
-        b.remove();
-      }
-    }
-  });
-}
-
-// Spawn particle effect
-function spawnParticles(x, y, c) {
-  for (let i = 0; i < 10; i++) {
-    let p = createSprite(x, y, 5, 5);
-    p.shapeColor = c;
-    p.velocity.x = random(-2, 2);
-    p.velocity.y = random(-2, 2);
-    p.lifetime = 20;
-    particleGroup.add(p);
-  }
-}
-
-function drawUI() {
+  // UI
   fill(0);
   textSize(24);
   textAlign(LEFT);
   text("Score: " + score, 20, 30);
   text("Health: " + health, 20, 60);
 
-  if (health <= 0) {
-    gameState = "lose";
-    fill(180, 0, 0, 180);
-    rect(0, 0, width, height);
-    fill(255);
-    textSize(60);
-    textAlign(CENTER, CENTER);
-    text("GAME OVER", width / 2, height / 2);
-  }
-
-  if (badPizzaGroup.length === 0) {
-    gameState = "win";
+  // WIN
+  if (gameState === "win") {
     fill(0, 180, 0, 180);
     rect(0, 0, width, height);
     fill(255);
     textSize(60);
     textAlign(CENTER, CENTER);
     text("YOU WIN!", width / 2, height / 2);
+    textSize(24);
+    text("Refresh to play again", width / 2, height / 2 + 60);
+  }
+
+  // LOSE
+  if (gameState === "lose") {
+    fill(180, 0, 0, 180);
+    rect(0, 0, width, height);
+    fill(255);
+    textSize(60);
+    textAlign(CENTER, CENTER);
+    text("GAME OVER", width / 2, height / 2);
+    textSize(24);
+    text("Refresh to play again", width / 2, height / 2 + 60);
+  }
+}
+
+// Movement and animation
+function handleMovement() {
+  let moving = false;
+
+  if (keys["ArrowLeft"] || keys["a"]) { player.position.x -= 4; moving = true; }
+  if (keys["ArrowRight"] || keys["d"]) { player.position.x += 4; moving = true; }
+  if (keys["ArrowUp"] || keys["w"]) { player.position.y -= 4; moving = true; }
+  if (keys["ArrowDown"] || keys["s"]) { player.position.y += 4; moving = true; }
+
+  player.position.x = constrain(player.position.x, 20, width - 20);
+  player.position.y = constrain(player.position.y, 20, height - 20);
+
+  // animation
+  if (moving) player.changeAnimation(frameCount % 20 < 10 ? "walk1" : "walk2");
+  else player.changeAnimation("idle");
+}
+
+// Move pizzas
+function movePizzas() {
+  for (let pizza of pizzaGroup) {
+    pizza.position.x += pizza._vx;
+    pizza.position.y += pizza._vy;
+    if (pizza.position.x < 20 || pizza.position.x > width - 20) pizza._vx *= -1;
+    if (pizza.position.y < 20 || pizza.position.y > height - 20) pizza._vy *= -1;
+  }
+
+  for (let bad of badPizzaGroup) {
+    bad.position.x += bad._vx;
+    bad.position.y += bad._vy;
+    if (bad.position.x < 20 || bad.position.x > width - 20) bad._vx *= -1;
+    if (bad.position.y < 20 || bad.position.y > height - 20) bad._vy *= -1;
+  }
+}
+
+// Collisions
+function checkCollisions() {
+  // rocks
+  for (let rock of rockGroup) {
+    if (player.overlap(rock)) {
+      player.position.x = prevX;
+      player.position.y = prevY;
+    }
+  }
+
+  // good pizza
+  for (let pizza of pizzaGroup) {
+    if (player.overlap(pizza)) {
+      score++;
+      createParticles(pizza.position.x, pizza.position.y, color(0,255,0));
+      pizza.position.x = random(50, 750);
+      pizza.position.y = random(50, 550);
+    }
+  }
+
+  // bad pizza
+  for (let bad of badPizzaGroup) {
+    if (player.overlap(bad)) {
+      health--;
+      createParticles(bad.position.x, bad.position.y, color(255,0,0));
+      bad.health--;
+      if (bad.health <= 0) bad.remove();
+      else {
+        bad.position.x = random(50, 750);
+        bad.position.y = random(50, 550);
+      }
+    }
+  }
+}
+
+// PARTICLE SYSTEM
+function createParticles(x, y, col) {
+  for (let i = 0; i < 10; i++) {
+    particles.push({
+      pos: createVector(x, y),
+      vel: p5.Vector.random2D().mult(random(1,3)),
+      lifespan: 60,
+      col: col
+    });
+  }
+}
+
+function handleParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.pos.add(p.vel);
+    p.lifespan--;
+    noStroke();
+    fill(p.col.levels[0], p.col.levels[1], p.col.levels[2], map(p.lifespan, 0, 60, 0, 255));
+    ellipse(p.pos.x, p.pos.y, 6);
+    if (p.lifespan <= 0) particles.splice(i, 1);
   }
 }
