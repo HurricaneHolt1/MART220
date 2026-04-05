@@ -23,7 +23,12 @@ function setup() {
   createCanvas(800, 600);
 
   // Ninja
-  ninja = new Ninja(width / 2, height - 50);
+  ninja = new Ninja(
+    width / 2, 
+    height - 50, 
+    ninjaIdle, 
+    [ninjaWalk1, ninjaWalk2]
+  );
 
   // Good pizzas
   for (let i = 0; i < 5; i++) {
@@ -96,13 +101,14 @@ function draw() {
 
 // ===== NINJA CLASS =====
 class Ninja {
-  constructor(x, y) {
+  constructor(x, y, idleImg, walkImgs) {
     this.pos = createVector(x, y);
     this.size = 50;
     this.speed = 5;
 
-    this.idleImg = ninjaIdle;
-    this.walkImgs = [ninjaWalk1, ninjaWalk2];
+    this.idleImg = idleImg;
+    this.walkImgs = walkImgs;
+
     this.currentFrame = 0;
     this.frameCounter = 0;
     this.isMoving = false;
