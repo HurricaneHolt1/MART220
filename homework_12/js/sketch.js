@@ -4,28 +4,29 @@ let angle3 = 0;
 let angle4 = 0;
 let angle5 = 0;
 
-// For text textures
 let titleGraphics;
 let nameGraphics;
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
 
-  // Create offscreen graphics for title
+  // --- TITLE TEXT ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.background(0, 0);
+  titleGraphics.background(0, 0); // fully transparent background
   titleGraphics.fill(255);
   titleGraphics.textSize(48);
   titleGraphics.textAlign(CENTER, CENTER);
   titleGraphics.text("3D Exploration", 200, 50);
+  titleGraphics.textFont('Arial');
 
-  // Create offscreen graphics for name
+  // --- NAME TEXT ---
   nameGraphics = createGraphics(400, 100);
-  nameGraphics.background(0, 0);
+  nameGraphics.background(0, 0); // fully transparent background
   nameGraphics.fill(255);
   nameGraphics.textSize(32);
   nameGraphics.textAlign(CENTER, CENTER);
-  nameGraphics.text("By Josh Holt", 200, 50);
+  nameGraphics.text("By Your Name", 200, 50);
+  nameGraphics.textFont('Arial');
 }
 
 function draw() {
@@ -35,7 +36,7 @@ function draw() {
   directionalLight(255, 255, 255, 0.25, 0.25, -1);
   ambientLight(100);
 
-  // ----- BOX -----
+  // ----- 3D SHAPES -----
   push();
   translate(-200, -100, 0);
   rotateX(angle1);
@@ -44,7 +45,6 @@ function draw() {
   box(100);
   pop();
 
-  // ----- SPHERE -----
   push();
   translate(150, -150, -100);
   rotateY(angle2);
@@ -52,7 +52,6 @@ function draw() {
   sphere(60);
   pop();
 
-  // ----- CONE -----
   push();
   translate(-150, 150, 50);
   rotateX(angle3);
@@ -60,7 +59,6 @@ function draw() {
   cone(50, 120);
   pop();
 
-  // ----- CYLINDER -----
   push();
   translate(200, 100, 100);
   rotateY(angle4);
@@ -68,7 +66,6 @@ function draw() {
   cylinder(40, 120);
   pop();
 
-  // ----- TORUS -----
   push();
   translate(0, 0, 200);
   rotateX(angle5);
@@ -77,14 +74,14 @@ function draw() {
   torus(70, 20);
   pop();
 
-  // Update rotation angles
+  // Update rotations
   angle1 += 0.01;
   angle2 += 0.02;
   angle3 += 0.015;
   angle4 += 0.018;
   angle5 += 0.013;
 
-  // ----- TITLE TEXT -----
+  // ----- FLOATING TEXT -----
   push();
   translate(0, -height / 2 + 80, 0);
   rotateX(-PI / 6);
@@ -92,7 +89,6 @@ function draw() {
   plane(400, 100);
   pop();
 
-  // ----- NAME TEXT -----
   push();
   translate(0, height / 2 - 80, 0);
   rotateX(-PI / 6);
