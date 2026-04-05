@@ -54,7 +54,7 @@ function setup() {
   // GOOD PIZZAS
   pizzaGroup = new Group();
   for (let i = 0; i < 5; i++) {
-    let pizza = createSprite(random(50, 750), random(50, 550), 30, 30);
+    let pizza = createSprite(random(50, 750), random(50, 550), 40, 40);
     pizza.addImage(pizzaImg);
     pizza.scale = 0.2;
     pizza._vx = random([-1.5, 1.5]);
@@ -65,7 +65,7 @@ function setup() {
   // BAD PIZZAS
   badPizzaGroup = new Group();
   for (let i = 0; i < 3; i++) {
-    let bad = createSprite(random(50, 750), random(50, 550), 30, 30);
+    let bad = createSprite(random(50, 750), random(50, 550), 40, 40);
     bad.addImage(badPizzaImg);
     bad.scale = 0.2;
     bad._vx = random([-2, 2]);
@@ -92,7 +92,11 @@ function draw() {
     if (health <= 0) gameState = "lose";
   }
 
-  drawSprites();
+  // Draw groups
+  rockGroup.draw();
+  pizzaGroup.draw();
+  badPizzaGroup.draw();
+  player.draw();
 
   // UI
   fill(0);
@@ -134,9 +138,10 @@ function handleMovement() {
   if (moving) player.changeAnimation(frameCount % 20 < 10 ? "walk1" : "walk2");
   else player.changeAnimation("idle");
 
+  // attack
   if (keys[" "]) {
     attacks.push({x: player.position.x + 40, y: player.position.y, vx: 8});
-    keys[" "] = false; // single fire
+    keys[" "] = false;
   }
 }
 
@@ -159,6 +164,7 @@ function movePizzas() {
 
 // COLLISIONS
 function handleCollisions() {
+  // ROCKS
   for (let rock of rockGroup) {
     if (player.overlap(rock)) {
       player.position.x = prevX;
@@ -166,8 +172,9 @@ function handleCollisions() {
     }
   }
 
+  // GOOD PIZZAS
   for (let pizza of pizzaGroup) {
-    if (player.overlap(pizza)) {
+    if (dist(player.position.x, player.position.y, pizza.position.x, pizza.position.y) < 25) {
       score++;
       createParticles(pizza.position.x, pizza.position.y, color(0,255,0));
       pizza.position.x = random(50, 750);
@@ -175,8 +182,9 @@ function handleCollisions() {
     }
   }
 
+  // BAD PIZZAS
   for (let bad of badPizzaGroup) {
-    if (player.overlap(bad)) {
+    if (dist(player.position.x, player.position.y, bad.position.x, bad.position.y) < 25) {
       health--;
       createParticles(bad.position.x, bad.position.y, color(255,0,0));
     }
@@ -215,7 +223,7 @@ function handleAttacks() {
     fill(255, 200, 0);
     ellipse(atk.x, atk.y, 10);
 
-    // check collision with bad pizzas
+    // collision with bad pizzas
     for (let j = badPizzaGroup.length-1; j>=0; j--) {
       let bad = badPizzaGroup[j];
       if (dist(atk.x, atk.y, bad.position.x, bad.position.y) < 20) {
@@ -227,7 +235,6 @@ function handleAttacks() {
       }
     }
 
-    // remove attack if off-screen
     if (atk.x > width) attacks.splice(i,1);
   }
 }
