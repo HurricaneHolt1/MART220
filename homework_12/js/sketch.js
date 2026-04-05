@@ -12,21 +12,22 @@ function setup() {
 
   // --- TITLE TEXT ---
   titleGraphics = createGraphics(400, 100);
-  titleGraphics.background(30); // match the canvas background
+  titleGraphics.clear; // match the canvas background
   titleGraphics.fill(255);
+  titleGraphics.textFont('Arial');
   titleGraphics.textSize(48);
   titleGraphics.textAlign(CENTER, CENTER);
   titleGraphics.text("3D Exploration", 200, 50);
-  titleGraphics.textFont('Arial');
-
+ 
   // --- NAME TEXT ---
   nameGraphics = createGraphics(400, 100);
-  nameGraphics.background(30); // match canvas background
+  nameGraphics.clear; // match canvas background
   nameGraphics.fill(255);
+  nameGraphics.textFont('Arial');
   nameGraphics.textSize(32);
   nameGraphics.textAlign(CENTER, CENTER);
   nameGraphics.text("By Josh Holt", 200, 50);
-  nameGraphics.textFont('Arial');
+ 
 }
 
 function draw() {
