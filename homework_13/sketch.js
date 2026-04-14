@@ -73,7 +73,7 @@ function setup() {
   titleG.fill(255);
   titleG.textSize(40);
   titleG.textAlign(CENTER, CENTER);
-  titleG.text("Orbital Pizza System", 200, 50);
+  titleG.text("Shapes In Orbit", 200, 50);
 
   // ----- NAME -----
   nameG = createGraphics(400, 100);
