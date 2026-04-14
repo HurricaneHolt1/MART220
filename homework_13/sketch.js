@@ -52,11 +52,11 @@ function preload() {
   myModel = loadModel('images/pizza.obj', true);
 
   // Load textures (from images folder)
-  textures[0] = loadImage('images/tex1.jpg');
-  textures[1] = loadImage('images/tex2.jpg');
-  textures[2] = loadImage('images/tex3.jpg');
-  textures[3] = loadImage('images/tex4.jpg');
-  textures[4] = loadImage('images/tex5.jpg');
+  textures[0] = loadImage('images/text1.jpg');
+  textures[1] = loadImage('images/text2.jpg');
+  textures[2] = loadImage('images/text3.jpg');
+  textures[3] = loadImage('images/text4.jpg');
+  textures[4] = loadImage('images/text5.jpg');
 }
 
 function setup() {
@@ -81,7 +81,7 @@ function setup() {
   nameG.fill(255);
   nameG.textSize(28);
   nameG.textAlign(CENTER, CENTER);
-  nameG.text("By Your Name", 200, 50);
+  nameG.text("By Josh Holt", 200, 50);
 }
 
 function draw() {
