@@ -53,7 +53,7 @@ function preload() {
 
   // Load textures (from images folder)
   textures[0] = loadImage('images/tex1.jpg');
-  textures[1] = loadImage('images/tex2.jpeg');
+  textures[1] = loadImage('images/tex2.jpg');
   textures[2] = loadImage('images/tex3.jpg');
   textures[3] = loadImage('images/tex4.jpg');
   textures[4] = loadImage('images/tex5.jpg');
